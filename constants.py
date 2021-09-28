@@ -5,6 +5,7 @@ RANDOM_SEED = 772
 LENGTH_THRESH = 8
 
 REGEX = {
+    "unicode": re.compile(r'((?:\\u[0-9A-Fa-f]+)|(?:[^\x00-\x84]))'),
     "hashtag": re.compile(r"#(\w+)"),
     "mention": re.compile(r"@(\w+)"),
     "url": re.compile(r"(?:http|https|ftp)://[a-zA-Z0-9\./]+"),
@@ -16,12 +17,12 @@ REGEX = {
 }
 
 EMOTES = [
-            ('__EMOTE__SMILE',  [':-)', ':)', '(:', '(-:', ':3', ':-3', ':P', ':-P',  ]),
-            ('__EMOTE__LAUGH',  [':-D', ':D', 'X-D', 'XD', 'xD',  '=D', '8D', '8-D', ]), # :p ?
+            ('__EMOTE__SMILE',  [':-)', ':)', '(:', '(-:', ':3', ':-3', ':P', ':-P', ':p', '^-^', '^_^',  ]),
+            ('__EMOTE__LAUGH',  [':-D', ':D', 'X-D', 'XD', 'xD',  '=D', '8D', '8-D', 'X-p', '^.^', ':O', 'XO', ]), # :p ?
             ('__EMOTE__LOVE',   ['<3', ':\\*',  '♥', ';^)', ':*', ':-*', ':X', '*_*',  ]),
-            ('__EMOTE__WINK',   [';-)', ';)', ';-D', ';D', '(;', '(-;',  '*)', '*-)', ]),
-            ('__EMOTE__SAD',    [':-(', ':(', '):', ')-:',  ':<', ':-<', ':c', ':-\\', '(-;', ':/', ':-/', ]),        # ':/', ':-/' do not include??? #hack 
-            ('__EMOTE__CRY',    [':,(', ':\'(', ':"(', ':((',  ':\'-(', ]),
+            ('__EMOTE__WINK',   [';-)', ';)', ';-D', ';D', '(;', '(-;',  '*)', '*-)', 'O.o', ]),
+            ('__EMOTE__SAD',    [':-(', ':(', '):', ')-:',  ':<', ':-<', ':c', ':-\\', '(-;', ':/', ':-/', 'X-(', ':-@', 'O_O', ]),        # ':/', ':-/' do not include??? #hack 
+            ('__EMOTE__CRY',    [':,(', ':\'(', ':"(', ':((',  ':\'-(', '>.<', ]),
             # TODO : https://en.wikipedia.org/wiki/List_of_emoticons
         ]
 for name, symbols in EMOTES:
@@ -45,9 +46,3 @@ for name, symbols in PUNCTUATIONS:
     for symbol in symbols:
         REGEX['punctuations'].update({symbol: name})
 
-
-INTERNET_SLANG = {
-    "u": "you",
-    "ur": "your",
-    "lol": "__EMOTE_LAUGH",
-}
