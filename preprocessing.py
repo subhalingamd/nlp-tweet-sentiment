@@ -15,7 +15,7 @@ from functools import lru_cache
 # stopwords_en = set(stopwords.words("english"))
 porter = PorterStemmer()
 
-
+# store as variables -> optimization
 REGEX__unicode = REGEX['unicode']
 REGEX__hashtag = REGEX['hashtag']
 REGEX__mention = REGEX['mention']
@@ -39,7 +39,7 @@ REGEX__emotes_punctuations = re.compile(r'(' + '|'.join(REGEX__emotes_punctuatio
 REGEX__contractions = [(re.compile(regex, flags=re.IGNORECASE), repl) for regex, repl in CONTRACTIONS]
 
 REGEX__slangs__dict = {}
-with open('slang.txt') as f:
+with open('slang.txt', 'r', encoding="utf-8") as f:
     REGEX__slangs__dict = dict(map(str.strip, line.partition('\t')[::2]) for line in f if line.strip())
 SLANGS = sorted(REGEX__slangs__dict, key=len, reverse=True)
 REGEX__slangs__keys = set(REGEX__slangs__dict.keys())
