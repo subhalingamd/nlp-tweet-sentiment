@@ -1,146 +1,166 @@
 import re
-from constants import REGEX
+from constants import REGEX, CONTRACTIONS, escape_for_regex
 
-import nltk
-from nltk.stem import WordNetLemmatizer
+# import nltk
+# from nltk.stem import WordNetLemmatizer
+# from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 from nltk.stem import PorterStemmer
-from nltk.corpus import stopwords
 
 from functools import partial
 from collections import Counter
 from functools import lru_cache
 
 # lemmatizer = WordNetLemmatizer()
-porter = PorterStemmer()
 # stopwords_en = set(stopwords.words("english"))
-
-# The lemmatizer code is adapted from:
-# https://gaurav5430.medium.com/using-nltk-for-lemmatizing-sentences-c1bfff963258
-def nltk_tag_to_wordnet_tag(nltk_tag):  # convert nltk tag to wordnet tag
-    if nltk_tag.startswith('J'):
-        return wordnet.ADJ
-    elif nltk_tag.startswith('V'):
-        return wordnet.VERB
-    elif nltk_tag.startswith('N'):
-        return wordnet.NOUN
-    elif nltk_tag.startswith('R'):
-        return wordnet.ADV
-    else:
-        return None
+porter = PorterStemmer()
 
 
-def lemmatize(sentence):
-    # tokenize the sentence and find the POS tag for each token
-    # nltk.word_tokenize(text)
-    tokens = sentence.split()
-    nltk_tagged = nltk.pos_tag(tokens)
+REGEX__unicode = REGEX['unicode']
+REGEX__hashtag = REGEX['hashtag']
+REGEX__mention = REGEX['mention']
+REGEX__url = REGEX['url']
+REGEX__repeat = REGEX['repeat']
+REGEX__delimiter = REGEX['delimiter']
+REGEX__number = REGEX['number']
 
-    # tuple of (token, wordnet_tag)
-    wordnet_tagged = map(lambda x: (x[0], nltk_tag_to_wordnet_tag(x[1])), nltk_tagged)
-    lemmatized_sentence = []
-    for word, tag in wordnet_tagged:
-        if tag is None:     # if there is no available tag, append the token as is
-            lemmatized_sentence.append(word)
-        else:               # else use the tag to lemmatize the token
-            lemmatized_sentence.append(lemmatizer.lemmatize(word, tag))
+REGEX__emotes__dict = REGEX['emotes']
+REGEX__punctuations__dict = REGEX['punctuations']
+REGEX__emotes_punctuations__dict = {**REGEX__emotes__dict, **REGEX__punctuations__dict}
 
-    return " ".join(lemmatized_sentence)
+REGEX__emotes__keys = [x.translate(str.maketrans(escape_for_regex)) for x in REGEX['emotes'].keys()]
+REGEX__punctuations__keys = [x.translate(str.maketrans(escape_for_regex)) for x in REGEX['punctuations'].keys()]
+REGEX__emotes_punctuations__keys = REGEX__emotes__keys + REGEX__punctuations__keys
+
+REGEX__emotes = re.compile(r'(' + '|'.join(REGEX__emotes__keys) + r')')
+REGEX__punctuations = re.compile(r'(' + '|'.join(REGEX__punctuations__keys) + r')')
+REGEX__emotes_punctuations = re.compile(r'(' + '|'.join(REGEX__emotes_punctuations__keys) + r')')
+
+REGEX__contractions = [(re.compile(regex, flags=re.IGNORECASE), repl) for regex, repl in CONTRACTIONS]
+
+REGEX__slangs__dict = {}
+with open('slang.txt') as f:
+    REGEX__slangs__dict = dict(map(str.strip, line.partition('\t')[::2]) for line in f if line.strip())
+SLANGS = sorted(REGEX__slangs__dict, key=len, reverse=True)
+REGEX__slangs__keys = set(REGEX__slangs__dict.keys())
+REGEX__slangs = re.compile(r"\b({})\b".format("|".join(map(re.escape, SLANGS))), flags=re.IGNORECASE)
+
+REGEX__not_tag = re.compile(r'\b(?:not|never|no)\b[\w\s]+[^\w\s]', flags=re.IGNORECASE)
+REGEX__not_tag_1 = re.compile(r'(\s+)(\w+)')
+
+
+def REPLACE__hashtag(x) -> str: return "__HASH__"+x.group(1).lower()
+def REPLACE__mention(x) -> str: return "__AT__"+x.group(1).lower()
+def REPLACE__emotes(x) -> str: return " "+REGEX__emotes__dict.get(x.group())+" "
+def REPLACE__punctuations(x) -> str: return " "+REGEX__punctuations__dict.get(x.group())+" "
+def REPLACE__emotes_punctuations(x) -> str: return " "+REGEX__emotes_punctuations__dict.get(x.group())+" "
+def REPLACE__slangs(x) -> str: return REGEX__slangs__dict.get(x.group(1).lower())
+def REPLACE__not_tag(x) -> str: return REGEX__not_tag_1.sub(r'\1__NEG__\2', x.group(0))
 
 
 def to_lower(sentence):
-    tokens = [token.lower() if not token.startswith('__') else token for token in sentence.split()]
-    return " ".join(tokens)
+    # tokens = [token.lower() if not token.startswith('__') else token for token in sentence.split()]
+    # return " ".join(tokens)
+    return sentence.lower()
 
 
 def list_unicode(s):
-    return REGEX['unicode'].findall(s)
+    return REGEX__unicode.findall(s)
 
 
 def list_hashtag(s):
-    return REGEX['hashtag'].findall(s)
+    return REGEX__hashtag.findall(s)
 
 
 def list_mention(s):
-    return REGEX['mention'].findall(s)
+    return REGEX__mention.findall(s)
 
 
 def list_url(s):
-    return REGEX['url'].findall(s)
+    return REGEX__url.findall(s)
 
 
 def list_repeat(s):
-    return REGEX['repeat'].findall(s)
+    return REGEX__repeat.findall(s)
 
 
 def count_unicode(s):
-    return len(REGEX['unicode'].findall(s))
+    return len(REGEX__unicode.findall(s))
 
 
 def count_hashtag(s):
-    return len(REGEX['hashtag'].findall(s))
+    return len(REGEX__hashtag.findall(s))
 
 
 def count_mention(s):
-    return (REGEX['mention'].findall(s))
+    return (REGEX__mention.findall(s))
 
 
 def count_url(s):
-    return len(REGEX['url'].findall(s))
+    return len(REGEX__url.findall(s))
 
 
 def count_repeat(s):
-    return len(REGEX['url'].findall(s))
+    return len(REGEX__repeat.findall(s))
 
 
 def process_unicode(s):
-    return REGEX['unicode'].sub('', s)
+    return REGEX__unicode.sub('', s)
 
 
 def process_hashtag(s):
-    return REGEX['hashtag'].sub(lambda x: "__HASH__"+x.group(1).lower(), s)
+    return REGEX__hashtag.sub(REPLACE__hashtag, s)
 
 
 def process_mention(s):
-    return REGEX['mention'].sub(lambda x: "__AT__"+x.group(1).lower(), s)
+    return REGEX__mention.sub(REPLACE__mention, s)
 
 
 def process_url(s):
-    return REGEX['url'].sub("__URL__", s)
+    return REGEX__url.sub("__URL__", s)
 
 
 def process_repeat(s):
-    return REGEX['repeat'].sub(r"\1\1", s)
+    return REGEX__repeat.sub(r"\1\1", s)
 
 
 def process_number(s):
     return REGEX['number'].sub(" ", s)
 
 
+def process_emotes(s):
+    # regex = r'(' + '|'.join(REGEX__emotes__keys) + r')'
+    return REGEX__emotes.sub(REPLACE__emotes, s)
+
+
+def process_punctuations(s):
+    # regex = r'(' + '|'.join(REGEX__punctuations__keys) + r')'
+    return REGEX__punctuations.sub(REPLACE__punctuations, s)
+
+
+def process_emotes_and_punctuations(s):
+    # regex = r'(' + '|'.join(REGEX__emotes_punctuations__keys) + r')'
+    return REGEX__emotes_punctuations.sub(REPLACE__emotes_punctuations, s)
+
+
+def process_contractions(text):
+    for (pattern, repl) in REGEX__contractions:
+        text = re.sub(pattern, repl, text)
+    return text
+
+
+def process_slangs(s):
+    return REGEX__slangs.sub(REPLACE__slangs, s)
+
+
 # @TODO:: modify
 
 """ Replaces contractions from a string to their equivalents """
-contraction_patterns = [ (r'won\'t', 'will not'), (r'can\'t', 'cannot'), (r'i\'m', 'i am'), (r'ain\'t', 'is not'), (r'(\w+)\'ll', '\g<1> will'), (r'(\w+)n\'t', '\g<1> not'),                       (r'(\w+)\'ve', '\g<1> have'), (r'(\w+)\'s', '\g<1> is'), (r'(\w+)\'re', '\g<1> are'), (r'(\w+)\'d', '\g<1> would'), (r'&', 'and'), (r'dammit', 'damn it'), (r'dont', 'do not'), (r'wont', 'will not') ]
-def replaceContraction(text):
-    patterns = [(re.compile(regex), repl) for (regex, repl) in contraction_patterns]
-    for (pattern, repl) in patterns:
-        (text, count) = re.subn(pattern, repl, text)
-    return text
-def addNotTag(text):
+def add_not_tag(s):
     """ Finds "not,never,no" and adds the tag NEG_ to all words that follow until the next punctuation """
-    transformed = re.sub(r'\b(?:not|never|no)\b[\w\s]+[^\w\s]', 
-       lambda match: re.sub(r'(\s+)(\w+)', r'\1__NEG__\2', match.group(0)), 
-       text,
-       flags=re.IGNORECASE)
-    return transformed
-""" Creates a dictionary with slangs and their equivalents and replaces them """
-with open('slang.txt') as file:
-    slang_map = dict(map(str.strip, line.partition('\t')[::2])
-    for line in file if line.strip())
+    return REGEX__not_tag.sub(REPLACE__not_tag, s)
 
-slang_words = sorted(slang_map, key=len, reverse=True) # longest first for regex
-regex = re.compile(r"\b({})\b".format("|".join(map(re.escape, slang_words))), re.IGNORECASE)
-replaceSlang = partial(regex.sub, lambda m: slang_map[m.group(1).lower()])
+'''
 ### Spell Correction begin ###
 """ Spell Correction http://norvig.com/spell-correct.html """
 def words(text): return re.findall(r'\w+', text.lower())
@@ -178,41 +198,7 @@ def edits2(word):
     """ All edits that are two edits away from `word`. """
     return (e2 for e1 in edits1(word) for e2 in edits1(e1))
 
-# def P(word, N=spell_voab_size): 
-#     """P robability of `word`. """
-#     return WORDS[word] / N
-# @lru_cache(maxsize=512)
-# def spellCorrection(word): 
-#     """ Most probable spelling correction for word. """
-#     return max(candidates(word), key=P)
-# def candidates(word): 
-#     """ Generate possible spelling corrections for word. """
-#     if word in WORDS_keys:
-#         return [word]
-#     return (known(edits1(word)) or known(edits2(word)) or [word])
-# def known(words): 
-#     """ The subset of `words` that appear in the dictionary of WORDS. """
-#     return set(w for w in words if w in WORDS_keys)
 
-# def edits1(word):
-#     """ All edits that are one edit away from `word`. """
-#     letters    = 'abcdefghijklmnopqrstuvwxyz'
-#     splits     = [(word[:i], word[i:])    for i in range(len(word) + 1)]
-#     deletes    = [L + R[1:]               for L, R in splits if R]
-#     transposes = [L + R[1] + R[0] + R[2:] for L, R in splits if len(R)>1]
-#     replaces   = [L + c + R[1:]           for L, R in splits if R for c in letters]
-#     inserts    = [L + c + R               for L, R in splits for c in letters]
-#     return set(deletes + transposes + replaces + inserts)
-
-# def edits2(word): 
-#     """ All edits that are two edits away from `word`. """
-#     return (e2 for e1 in edits1(word) for e2 in edits1(e1))
-
-### Spell Correction End ###
-
-
-def process_repeat(s, x):
-    return REGEX['repeat'].sub(r"\1\1", s)
 repeat_regexp = re.compile(r'(\w*)(\w)\2(\w*)')
 def replaceElongated(word):
     """ Replaces an elongated word with its basic form, unless the word exists in the lexicon """
@@ -224,47 +210,56 @@ def replaceElongated(word):
         return replaceElongated(repl_word)
     else:       
         return repl_word
+'''
+
 
 def preprocess(text):
-
+    text = text.strip()
     text = process_unicode(text)
     text = process_hashtag(text)
     text = process_mention(text)
     text = process_url(text)
 
-    for symbol, name in REGEX['emotes'].items():
-        text = text.replace(symbol, ' '+name+' ')
+    # for symbol, name in REGEX['emotes'].items():
+    #     text = text.replace(symbol, ' '+name+' ')
+    # text = process_emotes(text)
 
-    for symbol, name in REGEX['punctuations'].items():
-        text = text.replace(symbol, ' '+name+' ')
+    # for symbol, name in REGEX['punctuations'].items():
+    #     text = text.replace(symbol, ' '+name+' ')
+    # text = process_punctuations(text)
 
-    text = process_repeat(text,2)
-    text = replaceContraction(text)
-    # text = " ".join([replaceElongated(w) if not w.startswith("__") else w for w in text.split()])
-    text = replaceSlang(text)
-    text = addNotTag(text)
+    text = process_emotes_and_punctuations(text)
 
-    text = text.replace("'", "")    # didn't
-    text = REGEX['delimiter'].sub(' ', text)
-    text = re.sub(r'\s+', ' ', text)
-    text = to_lower(text)
+    text = process_repeat(text)
+    text = process_contractions(text)
+    text = process_slangs(text)
+
+    text = text.replace("'", "")    # didn't #hack
+    text = REGEX__delimiter.sub(' ', text)
+    # text = re.sub(r'\s+', ' ', text)  # split() takes care #hack
+
+    texts = text.split()
+    text = []
+    for word in texts:
+        if len(word) > 3 and not word.startswith("__"):
+            if word[-1] == word[-2] and word[:-1] in REGEX__slangs__keys:
+                text.append(process_slangs(word[:-1]))
+            elif word[-3] == word[-2] and word[:-2]+word[-1] in REGEX__slangs__keys:
+                text.append(process_slangs(word[:-2]+word[-1]))
+            elif word[-1] == word[-2] and word[-3] == word[-4] and word[:-3]+word[-1] in REGEX__slangs__keys:
+                text.append(process_slangs(word[:-3]+word[-2]))
+            else:
+                text.append(word)
+        else:
+            text.append(word)
+    text = " ".join(text)
+
     # text = text.replace("1", "one").replace("2", "to").replace("4", "for")
     text = process_number(text)
 
-    # texts = text.split()
-    # text = []
-    # for word in texts:
-    #     if len(word) > 3 and not word.startswith("__"):
-    #         if word[-1]==word[-2] and word[:-1] in WORDS_keys:
-    #             text.append(replaceSlang(word[:-1]))
-    #         elif word[-3]==word[-2] and word[:-2]+word[-1] in WORDS_keys:
-    #             text.append(replaceSlang(word[:-2]+word[-1]))
-    #         elif word[-1]==word[-2] and word[-3]==word[-4] and word[:-3]+word[-1] in WORDS_keys:
-    #             text.append(replaceSlang(word[:-3]+word[-2]))
-    #         else:
-    #             text.append(word)
-    #     else:
-    #         text.append(word)
+    text = add_not_tag(text)
+
+    text = to_lower(text)
 
     # texts = [spellCorrection(w) if not w.startswith("__") else w for w in text.split()]
     text = " ".join([porter.stem(t) for t in text.split()])
@@ -278,17 +273,20 @@ if __name__ == '__main__':
     # print(process_url("https://www.github.com/SubhalingamD owns https://subhalingamd.me!"))
     # print(process_repeat("loool yessssss cool"))
 
+    print(REGEX__emotes_punctuations__keys)
+
     texts = [
-                "@subhalingamd How are you.........??? :)", 
+                "@subhalingamd How are you.........??? :) :P :// xD", 
                 "I'm #fine lolll !!", 
                 "I don't know but this is better",
                 "I'm trying harder to complete these assignments that have been given to me.... :)",
                 "hungoverrr \u122c \x84",
-                "tommorow is holyday.. LoL",
+                "tommorow is holidayyy.. ♥ LoLLLL",
+                "this is :(subhalingam i hope you are fine)"
+            ]*1
 
-            ]
     for text in texts:
         print(text)
         print(preprocess(text))
 
-    print(replaceContraction("tshouldn't"))
+    print(process_contractions("i'm"))
