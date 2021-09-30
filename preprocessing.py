@@ -158,57 +158,61 @@ def add_not_tag(s):
 
 
 def preprocess(text):
-    text = text.strip()
-    text = process_unicode(text)
-    text = process_hashtag(text)
-    text = process_mention(text)
-    text = process_url(text)
+    try:
+        text = text.strip()
+        text = process_unicode(text)
+        text = process_hashtag(text)
+        text = process_mention(text)
+        text = process_url(text)
 
-    # for symbol, name in REGEX['emotes'].items():
-    #     text = text.replace(symbol, ' '+name+' ')
-    # text = process_emotes(text)
+        # for symbol, name in REGEX['emotes'].items():
+        #     text = text.replace(symbol, ' '+name+' ')
+        # text = process_emotes(text)
 
-    # for symbol, name in REGEX['punctuations'].items():
-    #     text = text.replace(symbol, ' '+name+' ')
-    # text = process_punctuations(text)
+        # for symbol, name in REGEX['punctuations'].items():
+        #     text = text.replace(symbol, ' '+name+' ')
+        # text = process_punctuations(text)
 
-    text = process_emotes_and_punctuations(text)
+        text = process_emotes_and_punctuations(text)
 
-    text = process_repeat(text)
-    text = process_contractions(text)
-    text = process_slangs(text)
+        text = process_repeat(text)
+        text = process_contractions(text)
+        text = process_slangs(text)
 
-    text = text.replace("'", "")    # didn't #hack
-    text = REGEX__delimiter.sub(' ', text)
-    # text = re.sub(r'\s+', ' ', text)  # split() takes care #hack
+        text = text.replace("'", "")    # didn't #hack
+        text = REGEX__delimiter.sub(' ', text)
+        # text = re.sub(r'\s+', ' ', text)  # split() takes care #hack
 
-    texts = text.split()
-    text = []
-    for word in texts:
-        if len(word) > 3 and not word.startswith("__"):
-            if word[-1] == word[-2] and word[:-1] in REGEX__slangs__keys:
-                text.append(process_slangs(word[:-1]))
-            elif word[-3] == word[-2] and word[:-2]+word[-1] in REGEX__slangs__keys:
-                text.append(process_slangs(word[:-2]+word[-1]))
-            elif word[-1] == word[-2] and word[-3] == word[-4] and word[:-3]+word[-1] in REGEX__slangs__keys:
-                text.append(process_slangs(word[:-3]+word[-2]))
+        texts = text.split()
+        text = []
+        for word in texts:
+            if len(word) > 3 and not word.startswith("__"):
+                if word[-1] == word[-2] and word[:-1] in REGEX__slangs__keys:
+                    text.append(process_slangs(word[:-1]))
+                elif word[-3] == word[-2] and word[:-2]+word[-1] in REGEX__slangs__keys:
+                    text.append(process_slangs(word[:-2]+word[-1]))
+                elif word[-1] == word[-2] and word[-3] == word[-4] and word[:-3]+word[-1] in REGEX__slangs__keys:
+                    text.append(process_slangs(word[:-3]+word[-2]))
+                else:
+                    text.append(word)
             else:
                 text.append(word)
-        else:
-            text.append(word)
-    text = " ".join(text)
+        text = " ".join(text)
 
-    # text = text.replace("1", "one").replace("2", "to").replace("4", "for")
-    text = process_number(text)
+        # text = text.replace("1", "one").replace("2", "to").replace("4", "for")
+        text = process_number(text)
 
-    text = add_not_tag(text)
+        text = add_not_tag(text)
 
-    text = to_lower(text)
+        text = to_lower(text)
 
-    # texts = [spellCorrection(w) if not w.startswith("__") else w for w in text.split()]
-    text = " ".join([porter.stem(t) for t in text.split()])
-    # text = lemmatize(text)
-    return text
+        # texts = [spellCorrection(w) if not w.startswith("__") else w for w in text.split()]
+        text = " ".join([porter.stem(t) for t in text.split()])
+        # text = lemmatize(text)
+        return text
+
+    except:  # noqa: E722
+        return text
 
 
 if __name__ == '__main__':
