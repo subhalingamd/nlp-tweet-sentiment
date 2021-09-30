@@ -446,3 +446,10 @@ yep	yup
 yuppie	yup
 lols	laugh out loud
 fuq	fuck
+wow	wow
+damn	damn
+it	it
+up	up
+dammit	damn it
+im	i am
+woah	wow
