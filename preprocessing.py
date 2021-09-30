@@ -4,12 +4,10 @@ from constants import REGEX, CONTRACTIONS, escape_for_regex
 # import nltk
 # from nltk.stem import WordNetLemmatizer
 # from nltk.corpus import stopwords
-from nltk.corpus import wordnet
+# from nltk.corpus import wordnet
 from nltk.stem import PorterStemmer
 
-from functools import partial
-from collections import Counter
-from functools import lru_cache
+# from functools import lru_cache
 
 # lemmatizer = WordNetLemmatizer()
 # stopwords_en = set(stopwords.words("english"))
@@ -153,64 +151,10 @@ def process_slangs(s):
     return REGEX__slangs.sub(REPLACE__slangs, s)
 
 
-# @TODO:: modify
-
-""" Replaces contractions from a string to their equivalents """
+# #TODO:: modify -> use FWL?
 def add_not_tag(s):
     """ Finds "not,never,no" and adds the tag NEG_ to all words that follow until the next punctuation """
     return REGEX__not_tag.sub(REPLACE__not_tag, s)
-
-'''
-### Spell Correction begin ###
-""" Spell Correction http://norvig.com/spell-correct.html """
-def words(text): return re.findall(r'\w+', text.lower())
-# WORDS = Counter(words(open('corporaForSpellCorrection.txt').read()))
-# spell_voab_size = sum(WORDS.values())
-# WORDS_keys = set(WORDS.keys())
-WORDS_keys = set(slang_map.keys())
-spell_voab_size = len(WORDS_keys)
-def P(word, N=spell_voab_size): 
-    """P robability of `word`. """
-    return 1
-@lru_cache(maxsize=512)
-def spellCorrection(word): 
-    """ Most probable spelling correction for word. """
-    return max(candidates(word.lower()), key=P)
-def candidates(word): 
-    """ Generate possible spelling corrections for word. """
-    if word in WORDS_keys:
-        return [word]
-    return (known(edits1(word)) or known(edits2(word)) or [word])
-def known(words): 
-    """ The subset of `words` that appear in the dictionary of WORDS. """
-    return set(w for w in words if w in WORDS_keys)
-letters    = 'abcdefghijklmnopqrstuvwxyz'
-def edits1(word):
-    """ All edits that are one edit away from `word`. """
-    splits     = [(word[:i], word[i:])    for i in range(len(word) + 1)]
-    deletes    = [L + R[1:]               for L, R in splits if R]
-    transposes = [L + R[1] + R[0] + R[2:] for L, R in splits if len(R)>1]
-    replaces   = [L + c + R[1:]           for L, R in splits if R for c in letters]
-    inserts    = [L + c + R               for L, R in splits for c in letters]
-    return set(deletes + transposes + replaces + inserts)
-
-def edits2(word): 
-    """ All edits that are two edits away from `word`. """
-    return (e2 for e1 in edits1(word) for e2 in edits1(e1))
-
-
-repeat_regexp = re.compile(r'(\w*)(\w)\2(\w*)')
-def replaceElongated(word):
-    """ Replaces an elongated word with its basic form, unless the word exists in the lexicon """
-    repl = r'\1\2\3'
-    if wordnet.synsets(word) or word.lower() in WORDS_keys:
-        return word
-    repl_word = repeat_regexp.sub(repl, word)
-    if repl_word != word:      
-        return replaceElongated(repl_word)
-    else:       
-        return repl_word
-'''
 
 
 def preprocess(text):
