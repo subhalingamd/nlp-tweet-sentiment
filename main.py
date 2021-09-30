@@ -78,7 +78,7 @@ def train(data_dir, model_dir):
             # ])),
             # ("classifier", LinearSVC(max_iter=10000, dual=False, random_state=RANDOM_SEED))
             ("classifier", LogisticRegression(
-                solver="lbfgs",
+                solver="saga",
                 penalty="l2",
                 C=1.5,
                 max_iter=10000,
