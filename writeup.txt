@@ -1,0 +1,21 @@
+None
+https://stackoverflow.com/questions/38263039/sentiwordnet-scoring-with-python, https://en.wiktionary.org/wiki/Appendix:English_internet_slang, https://github.com/Deffro/text-preprocessing-techniques, https://en.wikipedia.org/wiki/List_of_emoticons
+
+
+Credits
+-------
+* Internet slangs dictionary
+	- https://en.wiktionary.org/wiki/Appendix:English_internet_slang
+	- https://github.com/Deffro/text-preprocessing-techniques
+	- Few from my chats/dataset
+
+* Emoticons dictionary
+	- https://en.wikipedia.org/wiki/List_of_emoticons
+	- Few from my chats/dataset
+
+* Contractions dictionary
+	- https://github.com/Deffro/text-preprocessing-techniques
+
+* Forum: Sentiwordnet/POS tagging might not work well for tweets
+	- https://stackoverflow.com/questions/38263039/sentiwordnet-scoring-with-python
+
