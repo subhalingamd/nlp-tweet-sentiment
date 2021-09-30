@@ -152,8 +152,9 @@ def process_slangs(s):
 
 
 # #TODO:: modify -> use FWL?
-def add_not_tag(s):
-    """ Finds "not,never,no" and adds the tag NEG_ to all words that follow until the next punctuation """
+def add_not_tag(s):     # #TODO broken... :/ #wontfix
+    # ["not", "never", "no"] => __NEG__ prefix to words that follow, until *next punctuation*
+    # Adapted from: https://github.com/Deffro/text-preprocessing-techniques
     return REGEX__not_tag.sub(REPLACE__not_tag, s)
 
 
@@ -206,9 +207,7 @@ def preprocess(text):
 
         text = to_lower(text)
 
-        # texts = [spellCorrection(w) if not w.startswith("__") else w for w in text.split()]
         text = " ".join([porter.stem(t) for t in text.split()])
-        # text = lemmatize(text)
         return text
 
     except:  # noqa: E722
@@ -221,20 +220,17 @@ if __name__ == '__main__':
     # print(process_url("https://www.github.com/SubhalingamD owns https://subhalingamd.me!"))
     # print(process_repeat("loool yessssss cool"))
 
-    print(REGEX__emotes_punctuations__keys)
-
     texts = [
-                "@subhalingamd How are you.........??? :) :P :// xD", 
-                "I'm #fine lolll !!", 
-                "I don't know but this is better",
+                "@subhalingamd How are you.........??? :) :P :// xD",
+                "I'm #fine lolll !!",
+                "I doN't know but this is better...",
                 "I'm trying harder to complete these assignments that have been given to me.... :)",
                 "hungoverrr \u122c \x84",
                 "tommorow is holidayyy.. ♥ LoLLLL",
-                "this is :(subhalingam i hope you are fine)"
-            ]*1
+                "this is NOT a :(subhalingam i hope u r fine)"
+            ]
 
     for text in texts:
         print(text)
         print(preprocess(text))
 
-    print(process_contractions("i'm"))
