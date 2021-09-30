@@ -1,5 +1,5 @@
 None
-https://stackoverflow.com/questions/38263039/sentiwordnet-scoring-with-python, https://en.wiktionary.org/wiki/Appendix:English_internet_slang, https://github.com/Deffro/text-preprocessing-techniques, https://en.wikipedia.org/wiki/List_of_emoticons
+https://stackoverflow.com/questions/38263039/sentiwordnet-scoring-with-python, https://en.wiktionary.org/wiki/Appendix:English_internet_slang, https://github.com/Deffro/text-preprocessing-techniques, https://en.wikipedia.org/wiki/List_of_emoticons, http://en.wikipedia.org/wiki/Punctuation
 
 
 Credits
@@ -12,6 +12,9 @@ Credits
 * Emoticons dictionary
 	- https://en.wikipedia.org/wiki/List_of_emoticons
 	- Few from my chats/dataset
+
+* Punctuations dictionary
+	- http://en.wikipedia.org/wiki/Punctuation
 
 * Contractions dictionary
 	- https://github.com/Deffro/text-preprocessing-techniques
