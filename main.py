@@ -51,8 +51,9 @@ def test(model_dir, in_path, out_path):
 
         write_predictions(out_path, y_test)
 
-    except:  # noqa: E722
-        print("Could not load model. Creating dummy output.")
+    except Exception as e:  # noqa: E722
+        print("Could not load model. Generating random output.")
+        print(e)
         write_predictions(out_path, [4]*len(X_test))
 
 
