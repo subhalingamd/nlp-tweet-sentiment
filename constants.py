@@ -17,13 +17,12 @@ REGEX = {
 }
 
 EMOTES = [
-            ('__EMOTE__SMILE',  [':-)', ':)', '(:', '(-:', ':3', ':-3', ':P', ':-P', ':p', '^-^', '^_^',  ]),
-            ('__EMOTE__LAUGH',  [':-D', ':D', 'X-D', 'XD', 'xD',  '=D', '8D', '8-D', 'X-p', '^.^', ':O', 'XO', ]), # :p ?
-            ('__EMOTE__LOVE',   ['<3', ':\\*',  '♥', ';^)', ':*', ':-*', ':X', '*_*',  ]),
-            ('__EMOTE__WINK',   [';-)', ';)', ';-D', ';D', '(;', '(-;',  '*)', '*-)', 'O.o', ]),
-            ('__EMOTE__SAD',    [':-(', ':(', '):', ')-:',  ':<', ':-<', ':c', ':-\\', '(-;', ':/', ':-/', 'X-(', ':-@', 'O_O', ]),        # ':/', ':-/' do not include??? #hack 
-            ('__EMOTE__CRY',    [':,(', ':\'(', ':"(', ':((',  ':\'-(', '>.<', ]),
-            # TODO : https://en.wikipedia.org/wiki/List_of_emoticons
+            ('__EMOTE__SMILE',  [':-)', ':)', '(-:', '(:', ':-3', ':3', ':P', ':-P', ':p', '^-^', '^_^', ':S', ]),
+            ('__EMOTE__LAUGH',  [':-D', ':D', 'X-D', 'XD', 'xD', '=D', '8D', '8-D', 'X-p', 'xp', '^.^', ':O', 'XO', 'xO', '=P', '=p', ]),
+            ('__EMOTE__LOVE',   ['<3', ':\\*', '♥', ';^)', ':*', ':-*', ':X', '*_*', ]),
+            ('__EMOTE__WINK',   [';-)', ';)', ';-D', ';D', '(-;', '(;', '*)', '*-)', 'O.o', ]),
+            ('__EMOTE__SAD',    [':-(', ':(', ')-:', '):', ':<', ':-<', ':c', ':-\\', '(-;', ':/', ':-/', 'X-(', ':-@', 'O_O', ]),        # ':/', ':-/' do not include??? #hack 
+            ('__EMOTE__CRY',    [':,(', ':\'(', ':"(', ':((', ':\'-(', '>.<', ]),
         ]
 for name, symbols in EMOTES:
     for symbol in symbols:
@@ -36,9 +35,10 @@ for name, symbols in EMOTES:
             REGEX['emotes'].update({symbol.replace('(', '['): name})
             REGEX['emotes'].update({" ".join(symbol).replace('(', '['): name})
 
+
 PUNCTUATIONS = [
-                    ('__PUNC__EXCL',     ['!', '¡', ]),
                     ('__PUNC__QUES',     ['?', '¿', ]),
+                    ('__PUNC__EXCL',     ['!', '¡', ]),
                     ('__PUNC__ELLP',     ['...', '…', '. . .', ]),
                 ]
 for name, symbols in PUNCTUATIONS:
